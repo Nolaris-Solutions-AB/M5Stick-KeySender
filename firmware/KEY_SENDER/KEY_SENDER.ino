@@ -7,8 +7,8 @@
 // Scroll Lock
 // ============================================================
 
-// ESP32-BLE-Keyboard saknar färdig konstant för Scroll Lock.
-// 0xCF motsvarar KEY_SCROLL_LOCK i Arduino Keyboard-stilen.
+// ESP32-BLE-Keyboard does not provide a predefined constant for Scroll Lock.
+// 0xCF corresponds to KEY_SCROLL_LOCK in the Arduino Keyboard convention.
 const uint8_t KEY_SCROLL_LOCK_CUSTOM = 0xCF;
 
 // ============================================================
@@ -28,27 +28,27 @@ BleKeyboard bleKeyboard(
 );
 
 // ============================================================
-// Webbserver
+// Web server
 // ============================================================
 
 WebServer server(80);
 
 // ============================================================
-// Inställningar
+// Settings
 // ============================================================
 
 bool sendingEnabled = false;
 
-// Default: 4 minuter
+// Default: 4 minutes
 unsigned long sendInterval = 4UL * 60UL * 1000UL;
 
 unsigned long lastSendTime = 0;
 unsigned long keyCount = 0;
 
-// Default tangent
+// Default key
 String keyCombination = "SCROLLLOCKX2";
 
-// Hur länge en tangent/kombination hålls nere
+// How long a key or combination is held down
 const unsigned long KEY_HOLD_MS = 60;
 
 // ============================================================
@@ -67,7 +67,7 @@ unsigned long lastDisplayInterval = 0;
 String lastDisplayCombo = "";
 
 // ============================================================
-// Funktionsdeklaration
+// Function declarations
 // ============================================================
 
 void updateDisplay(bool force = false);
@@ -482,7 +482,7 @@ setInterval(
 )rawliteral";
 
 // ============================================================
-// Intervall
+// Interval
 // ============================================================
 
 unsigned long getIntervalMinutes()
@@ -498,7 +498,7 @@ unsigned long getIntervalSeconds()
 }
 
 // ============================================================
-// Modifierartangenter
+// Modifier keys
 // ============================================================
 
 bool isModifier(
@@ -571,7 +571,7 @@ bool isModifier(
 }
 
 // ============================================================
-// Specialtangenter
+// Special keys
 // ============================================================
 
 uint8_t getSpecialKey(
@@ -680,7 +680,7 @@ uint8_t getSpecialKey(
 }
 
 // ============================================================
-// Validera kombination
+// Validate combination
 // ============================================================
 
 bool validateCombination(
@@ -789,7 +789,7 @@ bool sendScrollLockX2()
         return false;
     }
 
-    // Första Scroll Lock
+    // First Scroll Lock
     bleKeyboard.press(
         KEY_SCROLL_LOCK_CUSTOM
     );
@@ -802,7 +802,7 @@ bool sendScrollLockX2()
 
     delay(120);
 
-    // Andra Scroll Lock
+    // Second Scroll Lock
     bleKeyboard.press(
         KEY_SCROLL_LOCK_CUSTOM
     );
@@ -831,7 +831,7 @@ bool sendScrollLockX2()
 }
 
 // ============================================================
-// Skicka tangentkombination
+// Send key combination
 // ============================================================
 
 bool sendKeyCombination()
@@ -983,14 +983,14 @@ bool startSending()
         return false;
     }
 
-    // Skicka DIREKT
+    // Send IMMEDIATELY
     if (
         !sendKeyCombination()
     ) {
         return false;
     }
 
-    // Därefter börjar hela intervallet
+    // Then start the full interval
     lastSendTime =
         millis();
 
@@ -1047,7 +1047,7 @@ bool toggleSending()
 }
 
 // ============================================================
-// Knapp A
+// Button A
 // ============================================================
 
 void handleButtonA()
@@ -1213,7 +1213,7 @@ void updateDisplay(
         BLACK
     );
 
-    // Rubrik
+    // Heading
     M5.Lcd.setTextSize(2);
 
     M5.Lcd.setTextColor(
@@ -1291,7 +1291,7 @@ void updateDisplay(
         : "STOPPED"
     );
 
-    // Kombination
+    // Combination
     M5.Lcd.setTextSize(1);
 
     M5.Lcd.setTextColor(
@@ -1321,7 +1321,7 @@ void updateDisplay(
         displayCombo
     );
 
-    // Intervall
+    // Interval
     M5.Lcd.setCursor(
         3,
         64
@@ -1333,7 +1333,7 @@ void updateDisplay(
         getIntervalSeconds()
     );
 
-    // Räknare
+    // Counter
     M5.Lcd.setCursor(
         105,
         64
@@ -1360,12 +1360,12 @@ void updateDisplay(
 }
 
 // ============================================================
-// Webbserver
+// Web server
 // ============================================================
 
 void setupWebServer()
 {
-    // Webbgränssnitt
+    // Web interface
     server.on(
         "/",
         HTTP_GET,
@@ -1393,7 +1393,7 @@ void setupWebServer()
         }
     );
 
-    // Enkel Companion-status
+    // Simple Companion status
     server.on(
         "/api/running",
         HTTP_GET,
@@ -1479,7 +1479,7 @@ void setupWebServer()
         }
     );
 
-    // Skicka nu
+    // Send now
     server.on(
         "/api/send",
         HTTP_POST,
@@ -1513,7 +1513,7 @@ void setupWebServer()
         }
     );
 
-    // Inställningar
+    // Settings
     server.on(
         "/api/settings",
         HTTP_POST,
@@ -1745,8 +1745,8 @@ void loop()
     M5.update();
 
     // Knapp A:
-    // stoppad -> skicka direkt + starta
-    // aktiv   -> stoppa
+    // stopped -> send immediately and start
+    // running -> stop
     if (
         M5.BtnA.wasPressed()
     ) {
@@ -1755,7 +1755,7 @@ void loop()
 
     server.handleClient();
 
-    // Automatisk sändning
+    // Automatic sending
     if (
         sendingEnabled &&
         bleKeyboard.isConnected()
