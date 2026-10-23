@@ -1,57 +1,90 @@
 # M5Stick-KeySender
 
-ESP32-based Bluetooth LE keyboard automation controlled over Wi-Fi.
+Bluetooth LE keyboard automation for M5StickC, controlled using Wi-Fi, a built-in web interface and an HTTP API.
 
-**Project status: Documentation and repository setup in progress. Firmware source has not been published yet.**
+**Status:** Original firmware source is published. The published sanitization and the exact toolchain/dependency versions have not yet been hardware-tested. This is not yet a tagged release.
 
-## Overview
+## Features
 
-M5Stick-KeySender is a small project intended to let an M5StickC/ESP32 act as a Bluetooth LE keyboard, sending configured keystrokes to a paired computer. The original project was built for remote and recurring keystrokes, including automation scenarios with Home Assistant.
+- BLE HID keyboard emulation using ESP32-BLE-Keyboard
+- Built-in Swedish-language responsive web interface
+- Manual start, stop, toggle and send-once actions
+- Recurring key combinations with configurable minutes and seconds (default: every 4 minutes)
+- Default key sequence: `SCROLLLOCKX2`
+- Button A toggles sending; starting sends the first sequence immediately
+- BLE, Wi-Fi and sending status, with a count of sent sequences
+- HTTP endpoints for automation / Home Assistant
 
-## Intended features
+## Hardware
 
-- Bluetooth Low Energy (BLE) HID keyboard emulation
-- Wi-Fi remote control using an HTTP API
-- Start/stop control from the M5Stick button
-- Periodic key presses with a configurable interval
-- Keyboard shortcuts, including a double Scroll Lock action
-- Home Assistant integration and status feedback
+Designed for **M5StickC (original)**. Other M5Stick models may require changes to the library and display/button code.
 
-These features describe the previous working project. The actual source code and its precise API behavior still need to be added and verified before publishing setup instructions.
+## Build and installation
 
-## Hardware and software
+1. Install Arduino IDE and a compatible ESP32 boards package.
+2. Install the **M5StickC** and **ESP32 BLE Keyboard** libraries (the sketch includes `M5StickC.h` and `BleKeyboard.h`).
+3. Open [firmware/KEY_SENDER/KEY_SENDER.ino](firmware/KEY_SENDER/KEY_SENDER.ino) in Arduino IDE.
+4. In the same directory, copy `secrets.example.h` to `secrets.h`.
+5. Edit `secrets.h` with your Wi-Fi SSID and password. **Do not commit this file.**
+6. Select the M5StickC target and upload the sketch.
+7. Pair the device named `M5StickC KEY SENDER` as a Bluetooth keyboard with the computer.
+8. Find the device IP address on its display or serial monitor (115200 baud) and visit `http://DEVICE_IP/`.
 
-- M5StickC / compatible ESP32 device (exact tested model to be confirmed)
-- A computer supporting Bluetooth LE keyboards
-- Wi-Fi network for remote control
-- Arduino/ESP32 development environment (exact dependency versions to be documented)
+The firmware waits for Wi-Fi before starting BLE and the web server; if Wi-Fi credentials are wrong or the access point cannot be reached, setup will wait indefinitely.
 
-## Planned repository structure
+**Compatibility note:** Exact ESP32 core/library versions have not yet been established. If the current versions fail to compile, please open an issue with your environment information.
 
-```text
-M5Stick-KeySender/
-├── README.md
-├── LICENSE
-├── CONTRIBUTING.md
-├── .gitignore
-├── firmware/              # Original Arduino/ESP32 source (pending)
-└── docs/                  # Wiring, setup, API and HA examples (pending)
+## HTTP API
+
+| Method | Endpoint | Description |
+|---|---|---|
+| GET | `/` | Web interface |
+| GET | `/api/status` | JSON status |
+| GET | `/api/running` | Plain-text `1` (active) or `0` (stopped) |
+| POST | `/api/start` | Send immediately and start periodic sending |
+| POST | `/api/stop` | Stop periodic sending |
+| POST | `/api/toggle` | Toggle active state |
+| POST | `/api/send` | Send current combination once |
+| POST | `/api/settings` | Set `combo`, `minutes` and `seconds` form parameters |
+
+The command endpoints return JSON status when successful. Start/toggle/send may return HTTP 503 when BLE is not connected. Settings rejects malformed parameters with HTTP 400.
+
+Example:
+
+```bash
+curl http://DEVICE_IP/api/status
+curl -X POST http://DEVICE_IP/api/toggle
+curl -X POST http://DEVICE_IP/api/settings \
+  -d 'combo=SCROLLLOCKX2' -d 'minutes=4' -d 'seconds=0'
 ```
 
-## Getting started
+Example status fields: `sending`, `bluetooth`, `wifi`, `minutes`, `seconds`, `combo`, and `count`.
 
-The tested firmware has **not yet been uploaded**. Please do not flash unverified code or rely on the described API until the original implementation is added.
+## Keyboard combinations
 
-Once firmware is available, this section will describe installation, BLE pairing, Wi-Fi configuration and configuration of key sequences.
+Examples: `SCROLLLOCKX2`, `SCROLLLOCK`, `CTRL+ALT+3`, `WIN+L`, `CTRL+SHIFT+ESC`, `ALT+F4`.
 
-## Security notes
+## Automation / Home Assistant
 
-The device is designed to generate keystrokes on a paired computer. Only pair it with computers you own or are authorized to control. When the HTTP interface is implemented, keep it on a trusted network and add authentication or other access restrictions before exposing it beyond that network. Do not commit Wi-Fi passwords, API tokens or other secrets.
+You can use REST commands in your own automation system:
 
-## Contributing
+```yaml
+rest_command:
+  keysender_toggle:
+    url: "http://DEVICE_IP/api/toggle"
+    method: POST
+```
 
-Issues, documentation improvements and pull requests are welcome. See [CONTRIBUTING.md](CONTRIBUTING.md).
+For status, GET `/api/running` returns `1` or `0`; `/api/status` provides more fields. Replace `DEVICE_IP` with the local IP address.
+
+## Security and limitations
+
+**Important:** The current HTTP server has **no authentication and uses unencrypted HTTP**. Anybody who can reach the device on port 80 can change the configured keystrokes, send keystrokes and start/stop automation. Restrict the device to a trusted, isolated network and never expose it directly to the internet. Bluetooth pairing also gives the device the ability to enter keys on the paired host; only pair with authorized systems.
+
+The settings are kept in RAM and are reset to defaults on reboot. The firmware does not currently handle Wi-Fi reconnection automatically.
 
 ## License
 
-MIT License — Copyright (c) 2026 Nolaris Solutions AB. See [LICENSE](LICENSE).
+MIT License. Copyright (c) 2026 Nolaris Solutions AB. See [LICENSE](LICENSE).
+
+Contributions welcome: [CONTRIBUTING.md](CONTRIBUTING.md).
