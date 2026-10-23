@@ -78,7 +78,7 @@ void updateDisplay(bool force = false);
 
 const char INDEX_HTML[] PROGMEM = R"rawliteral(
 <!DOCTYPE html>
-<html lang="sv">
+<html lang="en">
 
 <head>
 <meta charset="UTF-8">
@@ -193,7 +193,7 @@ input {
 <h1>KEY SENDER</h1>
 
 <p>
-Sändning:
+Sending:
 <span id="sending" class="status">...</span>
 </p>
 
@@ -208,21 +208,21 @@ WiFi:
 </p>
 
 <p>
-Antal sändningar:
+Sent sequences:
 <strong id="count">0</strong>
 </p>
 
 <p class="current">
-Aktuell kombination:
+Current combination:
 <strong id="currentCombo">...</strong>
 </p>
 
 <button class="start" onclick="startSending()">
-STARTA
+START
 </button>
 
 <button class="stop" onclick="stopSending()">
-STOPPA
+STOP
 </button>
 
 <button class="send" onclick="toggleSending()">
@@ -230,14 +230,14 @@ TOGGLE
 </button>
 
 <button class="send" onclick="sendOnce()">
-SKICKA NU
+SEND NOW
 </button>
 
 </div>
 
 <div class="card">
 
-<h2>Tangentkombination</h2>
+<h2>Key combination</h2>
 
 <input
     type="text"
@@ -247,7 +247,7 @@ SKICKA NU
 >
 
 <p class="small">
-Exempel:<br>
+Examples:<br>
 SCROLLLOCKX2<br>
 SCROLLLOCK<br>
 CTRL<br>
@@ -265,7 +265,7 @@ CTRL+ALT+DELETE
 
 <h2>Intervall</h2>
 
-<label>Minuter</label>
+<label>Minutes</label>
 
 <input
     type="number"
@@ -274,7 +274,7 @@ CTRL+ALT+DELETE
     value="4"
 >
 
-<label>Sekunder</label>
+<label>Seconds</label>
 
 <input
     type="number"
@@ -285,11 +285,11 @@ CTRL+ALT+DELETE
 >
 
 <p class="small" id="intervalInfo">
-Nuvarande intervall: 4 min 0 sek
+Current interval: 4 min 0 sek
 </p>
 
 <button onclick="saveSettings()">
-SPARA INSTÄLLNINGAR
+SAVE SETTINGS
 </button>
 
 </div>
@@ -361,7 +361,7 @@ async function saveSettings() {
         parseInt(document.getElementById('seconds').value) || 0;
 
     if(combo.length === 0) {
-        alert("Ange en tangentkombination.");
+        alert("Enter a key combination.");
         return;
     }
 
@@ -370,7 +370,7 @@ async function saveSettings() {
         seconds < 0 ||
         seconds > 59
     ) {
-        alert("Sekunder måste vara mellan 0 och 59.");
+        alert("Seconds must be between 0 and 59.");
         return;
     }
 
@@ -378,7 +378,7 @@ async function saveSettings() {
         minutes === 0 &&
         seconds === 0
     ) {
-        alert("Intervallet måste vara minst 1 sekund.");
+        alert("The interval must be at least 1 second.");
         return;
     }
 
@@ -399,7 +399,7 @@ async function saveSettings() {
 
         updateStatus();
 
-        alert("Inställningarna är sparade.");
+        alert("Settings saved.");
     }
     catch(e) {
         alert(e.message);
@@ -417,11 +417,11 @@ async function updateStatus() {
             document.getElementById('sending');
 
         if(status.sending) {
-            sending.textContent = "AKTIV";
+            sending.textContent = "RUNNING";
             sending.className = "status running";
         }
         else {
-            sending.textContent = "STOPPAD";
+            sending.textContent = "STOPPED";
             sending.className = "status stopped";
         }
 
@@ -429,11 +429,11 @@ async function updateStatus() {
             document.getElementById('ble');
 
         if(status.bluetooth) {
-            ble.textContent = "Ansluten";
+            ble.textContent = "Connected";
             ble.className = "connected";
         }
         else {
-            ble.textContent = "Inte ansluten";
+            ble.textContent = "Not connected";
             ble.className = "disconnected";
         }
 
@@ -441,11 +441,11 @@ async function updateStatus() {
             document.getElementById('wifi');
 
         if(status.wifi) {
-            wifi.textContent = "Ansluten";
+            wifi.textContent = "Connected";
             wifi.className = "connected";
         }
         else {
-            wifi.textContent = "Inte ansluten";
+            wifi.textContent = "Not connected";
             wifi.className = "disconnected";
         }
 
@@ -457,11 +457,11 @@ async function updateStatus() {
 
         document.getElementById('intervalInfo')
             .textContent =
-            "Nuvarande intervall: " +
+            "Current interval: " +
             status.minutes +
             " min " +
             status.seconds +
-            " sek";
+            " sec";
     }
     catch(e) {
         console.log(e);
