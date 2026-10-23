@@ -1,0 +1,26 @@
+# Arduino build artifacts
+build/
+.pio/
+*.elf
+*.bin
+*.hex
+*.map
+*.o
+*.d
+
+# IDE and editor files
+.vscode/
+.idea/
+*.swp
+*~
+.DS_Store
+Thumbs.db
+
+# Local secrets and configuration
+.env
+.env.*
+!.env.example
+secrets.h
+credentials.h
+wifi_credentials.h
+config.local.h
