@@ -12,6 +12,20 @@ Use an M5StickC as a Bluetooth keyboard that sends key combinations on demand or
 
 > **Project status:** v1.0.0 is published. The firmware has been compiled and verified in Arduino IDE on the original M5StickC (October 23, 2026). End-to-end runtime testing of all BLE and HTTP functions has not yet been separately confirmed.
 
+## Photos and screenshots
+
+The original M5StickC running KEY SENDER:
+
+<p align="center">
+  <img src="assets/images/m5stick-device.jpg" alt="Original M5StickC running M5Stick-KeySender firmware" width="700">
+</p>
+
+The built-in web interface:
+
+<p align="center">
+  <img src="assets/images/web-ui.png" alt="M5Stick-KeySender web interface with connection status, send controls, and key combination settings" width="340">
+</p>
+
 ## Features
 
 - Bluetooth Low Energy (BLE) HID keyboard emulation
